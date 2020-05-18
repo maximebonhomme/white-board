@@ -4,7 +4,7 @@ const server = () => {
   const env = process.env.NODE_ENV
 
   if (env === "development") {
-    URL = "http://localhost:3000"
+    URL = "http://127.0.0.1:9000"
   }
 
   return URL
