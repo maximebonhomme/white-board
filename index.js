@@ -4,9 +4,6 @@ const socketIo = require("socket.io")
 
 const production = process.env.NODE_ENV === "production"
 
-console.log("_______")
-console.log(production)
-
 const app = express()
 const port = process.env.PORT || 9000
 const build = production ? "client/src" : "client/build"
@@ -33,6 +30,12 @@ io.on("connection", (socket) => {
     removeUser(socket)
   })
 })
+
+console.log("_______")
+console.log(production)
+console.log(port)
+console.log(build)
+console.log(express.static(build))
 
 app.use(express.static(build))
 
