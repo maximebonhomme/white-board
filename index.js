@@ -2,11 +2,8 @@ const express = require("express")
 const http = require("http")
 const socketIo = require("socket.io")
 
-const production = process.env.NODE_ENV === "production"
-
 const app = express()
 const port = process.env.PORT || 9000
-const build = production ? "client/src" : "client/build"
 
 const server = http.createServer(app)
 const io = socketIo(server)
@@ -31,12 +28,6 @@ io.on("connection", (socket) => {
   })
 })
 
-console.log("_______")
-console.log(production)
-console.log(port)
-console.log(build)
-console.log(express.static(build))
-
-app.use(express.static(build))
+app.use(express.static("client/build"))
 
 server.listen(port, () => console.log(`Listening on port ${port}`))
