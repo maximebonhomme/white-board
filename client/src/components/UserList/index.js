@@ -1,6 +1,8 @@
 import React, { useContext, useEffect } from "react"
 import io from "socket.io-client"
 
+import server from "../../utils/server"
+
 import { UsersContext } from "../../context/UsersContext"
 
 const UserList = () => {
