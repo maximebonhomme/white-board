@@ -8,22 +8,23 @@ const port = process.env.PORT || 9000
 const server = http.createServer(app)
 const io = socketIo(server)
 
-const getApiAndEmit = (socket) => {
-  const response = new Date()
-  // Emitting a new message. Will be consumed by the client
-  socket.emit("FromAPI", response)
+const addUser = (socket) => {
+  socket.broadcast.emit("addUser", socket.id)
 }
 
-let interval
+const removeUser = (socket) => {
+  socket.broadcast.emit("removeUser", socket.id)
+}
+
 io.on("connection", (socket) => {
-  console.log("New client connected", socket.id)
-  if (interval) {
-    clearInterval(interval)
-  }
-  interval = setInterval(() => getApiAndEmit(socket), 1000)
+  console.log("Client connected", socket.id)
+
+  addUser(socket)
+
   socket.on("disconnect", () => {
     console.log("Client disconnected", socket.id)
-    clearInterval(interval)
+
+    removeUser(socket)
   })
 })
 
