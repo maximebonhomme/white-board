@@ -1,38 +1,19 @@
-import React, { useContext, useEffect } from "react"
-import io from "socket.io-client"
+import React, { useContext } from "react"
 
-import server from "../../utils/server"
-
+import Users from "../../containers/Users"
 import { UsersContext } from "../../context/UsersContext"
 
 const UserList = () => {
-  const { state, dispatch } = useContext(UsersContext)
-
-  useEffect(() => {
-    const socket = io(server)
-
-    socket.on("addUser", (id) => {
-      dispatch({ type: "add", payload: id })
-    })
-
-    socket.on("removeUser", (id) => {
-      dispatch({ type: "remove", payload: id })
-    })
-
-    return () => {
-      socket.off("addUser").off("removeUser")
-    }
-  }, [dispatch])
+  const { state } = useContext(UsersContext)
 
   return (
-    <div>
-      <div>userlist</div>
-      <div>
-        {state.users.map((u) => (
-          <div key={u.id}>{u.name}</div>
-        ))}
-      </div>
-    </div>
+    <Users>
+      <div>Userlist:</div>
+
+      {state.users.map(({ id, name }) => (
+        <div key={id}>{name}</div>
+      ))}
+    </Users>
   )
 }
 
