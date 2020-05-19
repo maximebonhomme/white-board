@@ -9,9 +9,15 @@ const UserList = () => {
     <>
       <div>Userlist:</div>
 
-      {state.users.map(({ id, name }) => (
-        <div key={id}>{name}</div>
-      ))}
+      {state.users.map(({ id, name }) => {
+        const isMyself = id === state.myself.id
+
+        return (
+          <div style={{ color: isMyself ? "green" : "black" }} key={id}>
+            {name}
+          </div>
+        )
+      })}
     </>
   )
 }

@@ -1,2 +1,2 @@
-export const ADD_USER = "addUser"
-export const REMOVE_USER = "removeUser"
+export const ADD_MYSELF = "addMyself"
+export const USER_LIST = "userList"
