@@ -7,17 +7,19 @@ const UserList = () => {
 
   return (
     <>
-      <div>Userlist:</div>
+      <h2>Users connected:</h2>
 
-      {state.users.map(({ id, name, color }) => {
-        const isMyself = id === state.myself.id
+      <ul>
+        {state.users.map(({ id, name, color }) => {
+          const isMyself = id === state.myself.id
 
-        return (
-          <div style={{ color: isMyself ? "#000" : color }} key={id}>
-            {name}
-          </div>
-        )
-      })}
+          return (
+            <li style={{ color: isMyself ? "#000" : color }} key={id}>
+              {name}
+            </li>
+          )
+        })}
+      </ul>
     </>
   )
 }
