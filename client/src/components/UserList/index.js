@@ -8,25 +8,21 @@ import { UsersContext } from "../../context/UsersContext"
 const UserList = () => {
   const { state, dispatch } = useContext(UsersContext)
 
-  const addUser = (id) => {
-    dispatch({ type: "add", payload: id })
-  }
-
-  const removeUser = (id) => {
-    dispatch({ type: "remove", payload: id })
-  }
-
   useEffect(() => {
     const socket = io(server)
 
-    socket.on("addUser", addUser)
+    socket.on("addUser", (id) => {
+      dispatch({ type: "add", payload: id })
+    })
 
-    socket.on("removeUser", removeUser)
+    socket.on("removeUser", (id) => {
+      dispatch({ type: "remove", payload: id })
+    })
 
     return () => {
       socket.off("addUser").off("removeUser")
     }
-  }, [])
+  }, [dispatch])
 
   return (
     <div>
