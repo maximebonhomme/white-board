@@ -15,6 +15,7 @@ io.on("connection", (socket) => {
   const user = {
     id: socket.id,
     name: randomName(),
+    color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
   }
   console.log("Client connected", user.name)
 
