@@ -1,31 +1,11 @@
-import React, { useReducer } from "react"
-import generateName from "../utils/generateName"
+import React, { useReducer, useEffect } from "react"
+import PropTypes from "prop-types"
+import io from "socket.io-client"
 
-const addUser = (users, id) => {
-  const u = {
-    id,
-    name: generateName(),
-  }
+import usersReducer from "../reducers/usersReducer"
+import { ADD_USER, REMOVE_USER } from "../actions/usersActions"
 
-  return [...users, u]
-}
-
-const removeUser = (users, id) => {
-  const u = users.filter((user) => user.id !== id)
-
-  return u
-}
-
-const reducer = (state, action) => {
-  switch (action.type) {
-    case "add":
-      return { ...state, users: addUser(state.users, action.payload) }
-    case "remove":
-      return { ...state, users: removeUser(state.users, action.payload) }
-    default:
-      return
-  }
-}
+import server from "../utils/server"
 
 const initialState = {
   users: [],
@@ -34,13 +14,33 @@ const initialState = {
 const UsersContext = React.createContext(initialState)
 
 const UsersProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(reducer, initialState)
+  const [state, dispatch] = useReducer(usersReducer, initialState)
+
+  useEffect(() => {
+    const socket = io(server)
+
+    socket.on(ADD_USER, (id) => {
+      dispatch({ type: ADD_USER, payload: id })
+    })
+
+    socket.on(REMOVE_USER, (id) => {
+      dispatch({ type: REMOVE_USER, payload: id })
+    })
+
+    return () => {
+      socket.off(ADD_USER).off(REMOVE_USER)
+    }
+  }, [dispatch])
 
   return (
     <UsersContext.Provider value={{ state, dispatch }}>
       {children}
     </UsersContext.Provider>
   )
+}
+
+UsersProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 }
 
 export { UsersContext, UsersProvider }
