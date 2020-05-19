@@ -1,11 +1,10 @@
-import React, { useReducer, useEffect } from "react"
+import React, { useReducer, useEffect, useContext } from "react"
 import PropTypes from "prop-types"
-import io from "socket.io-client"
 
 import usersReducer from "../reducers/usersReducer"
 import { ADD_MYSELF, USER_LIST } from "../actions/usersActions"
 
-import server from "../utils/server"
+import { SocketContext } from "./SocketContext"
 
 const initialState = {
   users: [],
@@ -15,11 +14,10 @@ const initialState = {
 const UsersContext = React.createContext(initialState)
 
 const UsersProvider = ({ children }) => {
+  const { socket } = useContext(SocketContext)
   const [state, dispatch] = useReducer(usersReducer, initialState)
 
   useEffect(() => {
-    const socket = io(server)
-
     socket.on(ADD_MYSELF, (user) => {
       dispatch({ type: ADD_MYSELF, payload: user })
     })
@@ -31,7 +29,7 @@ const UsersProvider = ({ children }) => {
     return () => {
       socket.off(ADD_MYSELF).off(USER_LIST)
     }
-  }, [dispatch])
+  }, [dispatch, socket])
 
   return (
     <UsersContext.Provider value={{ state, dispatch }}>
