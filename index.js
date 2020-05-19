@@ -15,6 +15,7 @@ io.on("connection", (socket) => {
   const user = {
     id: socket.id,
     name: randomName(),
+    color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
   }
   console.log("Client connected", user.name)
 
@@ -22,6 +23,9 @@ io.on("connection", (socket) => {
 
   io.of("/").emit("userList", connectedUsers)
   socket.emit("addMyself", user)
+  socket.on("clientMouseUpdate", (data) => {
+    socket.broadcast.emit("mouseUpdate", data)
+  })
 
   socket.on("disconnect", () => {
     console.log("Client disconnected", user.name)
