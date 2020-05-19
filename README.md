@@ -5,10 +5,11 @@
 ## Installation
 `$ make install`
 
-## Start server
+## Development
 `$ node index.js`
 
-## Start react env
 `$ cd client/`
 
 `$ yarn start`
+
+`http://localhost:3000`
