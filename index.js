@@ -21,11 +21,12 @@ io.on("connection", (socket) => {
 
   connectedUsers.push(user)
 
+  socket.on("clientMouseUpdate", (data) => {
+    socket.broadcast.emit("cursorUpdate", data)
+  })
+
   io.of("/").emit("userList", connectedUsers)
   socket.emit("addMyself", user)
-  socket.on("clientMouseUpdate", (data) => {
-    socket.broadcast.emit("mouseUpdate", data)
-  })
 
   socket.on("disconnect", () => {
     console.log("Client disconnected", user.name)
