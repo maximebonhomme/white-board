@@ -11,6 +11,41 @@ const io = socketIo(server)
 
 let connectedUsers = []
 
+// states:
+// 0: waiting for players (min 2)
+// 1: pick player to draw
+// 2: player finish drawing - send path to other players
+// 3: game running
+// 4: 1 player finished, start end timer (X sec)
+// 5: game finished - apply points
+
+let gameState = {
+  state: 0,
+  currentPlayer: 0,
+}
+
+const updateState = (newState) => {
+  gameState.state = newState
+  io.of("/").emit("updateGameState", gameState.state)
+
+  switch (gameState.state) {
+    case 0:
+      return
+    case 1:
+    // pick player
+    case 2:
+    // send path to players
+    case 3:
+    // game running
+    // start server timer
+    case 4:
+    // start server timer2
+    case 5:
+    // apply points
+    // back to case 1
+  }
+}
+
 io.on("connection", (socket) => {
   const user = {
     id: socket.id,
@@ -20,6 +55,10 @@ io.on("connection", (socket) => {
   // console.log("Client connected", user.name)
 
   connectedUsers.push(user)
+
+  if (connectedUsers.length > 1 && !gameState.state) {
+    updateState(1)
+  }
 
   socket.on("clientMouseUpdate", (data) => {
     socket.broadcast.emit("cursorUpdate", data)
@@ -33,6 +72,9 @@ io.on("connection", (socket) => {
 
     connectedUsers = connectedUsers.filter((u) => u.id !== user.id)
     io.of("/").emit("userList", connectedUsers)
+    if (connectedUsers.length <= 1 && gameState.state > 0) {
+      updateState(0)
+    }
   })
 })
 

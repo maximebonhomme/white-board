@@ -42,10 +42,10 @@ const Canvas = () => {
     canvasRef.current.appendChild(app.current.view)
 
     dragCircle.current = new DragCircle(x, y, DRAG_RADIUS)
-    app.current.stage.addChild(dragCircle.current.pixiObject)
-
     path.current = new Path([dragCircle.current.position])
+
     app.current.stage.addChild(path.current.pixiObject)
+    app.current.stage.addChild(dragCircle.current.pixiObject)
 
     app.current.ticker.add(mainLoop)
 

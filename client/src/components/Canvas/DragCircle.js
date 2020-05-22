@@ -4,6 +4,9 @@ import { DRAG_COLOR } from "./constants"
 
 class DragCircle {
   constructor(x, y, radius) {
+    if (!x || !y) {
+      console.error("DragCircle requires an X and Y values on init")
+    }
     this.circle = null
     this.pos = {
       x,
