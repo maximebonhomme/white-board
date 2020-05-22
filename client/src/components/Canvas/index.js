@@ -1,34 +1,65 @@
-import React, { useRef } from "react"
-import styled, { css } from "@xstyled/styled-components"
+import React, { useRef, useEffect, useCallback } from "react"
+import * as PIXI from "pixi.js"
 import { useWindowSize } from "react-use"
 
 import Cursors from "../Cursors"
 
-const full = css`
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-`
+import DragCircle from "./DragCircle"
+import Path from "./Path"
 
-const Container = styled.div`
-  position: fixed;
-  ${full}
-`
+import { DRAG_RADIUS, DRAG_COLOR, PATH_COLOR } from "./constants"
 
-const StyledCanvas = styled.canvas`
-  position: absolute;
-  ${full}
-`
+import { Container, StyledCanvas } from "./styles"
 
 const Canvas = () => {
-  const canvasRef = useRef(null)
   const { width, height } = useWindowSize()
+  const canvasRef = useRef(null)
+  const app = useRef(null)
+
+  const dragCircle = useRef(null)
+  const path = useRef(null)
+
+  const mainLoop = useCallback(() => {
+    if (
+      path.current.lastPoint.x !== dragCircle.current.position.x &&
+      path.current.lastPoint.y !== dragCircle.current.position.y
+    ) {
+      // add new point to path from dragCircle position
+      // only if the last point of path is different than current position
+      path.current.addPoint = dragCircle.current.position
+    }
+  }, [dragCircle, path])
+
+  useEffect(() => {
+    const { x, y } = { x: Math.random() * width, y: Math.random() * height }
+
+    app.current = new PIXI.Application({
+      width: width,
+      height: height,
+      transparent: true,
+      resolution: 1,
+    })
+    canvasRef.current.appendChild(app.current.view)
+
+    // add dragCircle
+    dragCircle.current = new DragCircle(x, y, DRAG_RADIUS, DRAG_COLOR)
+    app.current.stage.addChild(dragCircle.current.pixiObject)
+
+    // add path
+    path.current = new Path([dragCircle.current.position], PATH_COLOR)
+    app.current.stage.addChild(path.current.pixiObject)
+
+    app.current.ticker.add(mainLoop)
+
+    return () => {
+      app.current.destroy(true, true)
+    }
+  }, [canvasRef, width, height, mainLoop])
 
   return (
     <Container>
       <Cursors />
-      <StyledCanvas width={width} height={height} ref={canvasRef} />
+      <StyledCanvas ref={canvasRef} />
     </Container>
   )
 }

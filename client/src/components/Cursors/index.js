@@ -1,29 +1,11 @@
 import React, { useEffect, useContext, useRef } from "react"
-import styled from "@xstyled/styled-components"
 import { useMouse } from "react-use"
 
 import { UsersContext } from "../../context/UsersContext"
 import { SocketContext } from "../../context/SocketContext"
 
-const CURSOR_SIZE = 10
-
-const Container = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-`
-
-const Cursor = styled.span`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: ${CURSOR_SIZE}px;
-  height: ${CURSOR_SIZE}px;
-  border-radius: 50%;
-  background-color: ${(p) => p.color};
-`
+import { CURSOR_SIZE } from "./constants"
+import { Container, Cursor } from "./styles"
 
 const Cursors = () => {
   const { state } = useContext(UsersContext)
@@ -48,6 +30,10 @@ const Cursors = () => {
 
       if (el) el.style.transform = `translate(${x}px, ${y}px)`
     })
+
+    return () => {
+      socket.off("cursorUpdate")
+    }
   }, [socket])
 
   return (
@@ -56,9 +42,8 @@ const Cursors = () => {
         const isMyself = id === state.myself.id
         if (isMyself) return null
 
-        return <Cursor id={id} color={color} />
+        return <Cursor key={id} id={id} color={color} />
       })}
-      <div>cursors</div>
     </Container>
   )
 }
