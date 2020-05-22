@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useCallback } from "react"
+import React, { useRef, useEffect, useCallback, useContext } from "react"
 import * as PIXI from "pixi.js"
 import { useWindowSize } from "react-use"
 
@@ -9,9 +9,14 @@ import Path from "./Path"
 
 import { DRAG_RADIUS } from "./constants"
 
+import { GameContext } from "../../context/GameContext"
+import { UsersContext } from "../../context/UsersContext"
+
 import { Container, StyledCanvas } from "./styles"
 
 const Canvas = () => {
+  const gameCtx = useContext(GameContext)
+  const usersCtx = useContext(UsersContext)
   const { width, height } = useWindowSize()
   const canvasRef = useRef(null)
   const app = useRef(null)
@@ -21,6 +26,10 @@ const Canvas = () => {
 
   const mainLoop = useCallback(() => {
     if (
+      path &&
+      path.current &&
+      dragCircle &&
+      dragCircle.current &&
       path.current.lastPoint.x !== dragCircle.current.position.x &&
       path.current.lastPoint.y !== dragCircle.current.position.y
     ) {
@@ -30,9 +39,17 @@ const Canvas = () => {
     }
   }, [dragCircle, path])
 
-  useEffect(() => {
+  const createPathAndDragCircle = () => {
     const { x, y } = { x: Math.random() * width, y: Math.random() * height }
 
+    dragCircle.current = new DragCircle(x, y, DRAG_RADIUS)
+    path.current = new Path([dragCircle.current.position])
+
+    app.current.stage.addChild(path.current.pixiObject)
+    app.current.stage.addChild(dragCircle.current.pixiObject)
+  }
+
+  useEffect(() => {
     app.current = new PIXI.Application({
       width: width,
       height: height,
@@ -41,18 +58,21 @@ const Canvas = () => {
     })
     canvasRef.current.appendChild(app.current.view)
 
-    dragCircle.current = new DragCircle(x, y, DRAG_RADIUS)
-    path.current = new Path([dragCircle.current.position])
-
-    app.current.stage.addChild(path.current.pixiObject)
-    app.current.stage.addChild(dragCircle.current.pixiObject)
-
     app.current.ticker.add(mainLoop)
 
     return () => {
       app.current.destroy(true, true)
     }
   }, [canvasRef, width, height, mainLoop])
+
+  useEffect(() => {
+    if (
+      gameCtx.state.gameState === 1 &&
+      gameCtx.state.currentPlayer === usersCtx.state.myself.id
+    ) {
+      console.log("ITS ME")
+    }
+  }, [gameCtx, usersCtx])
 
   return (
     <Container>

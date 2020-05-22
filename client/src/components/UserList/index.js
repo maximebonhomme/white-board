@@ -6,6 +6,7 @@ import { Container, List } from "./styles"
 
 const UserList = () => {
   const { state } = useContext(UsersContext)
+  if (!state.myself) return null
 
   return (
     <Container>

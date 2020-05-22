@@ -14,6 +14,7 @@ const Cursors = () => {
   const { elX, elY } = useMouse(containerRef)
 
   useEffect(() => {
+    if (!state.myself) return
     socket.emit("clientMouseUpdate", {
       id: state.myself.id,
       color: state.myself.color,
@@ -39,6 +40,7 @@ const Cursors = () => {
   return (
     <Container ref={containerRef}>
       {state.users.map(({ id, color }) => {
+        if (!state.myself) return null
         const isMyself = id === state.myself.id
         if (isMyself) return null
 

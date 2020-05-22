@@ -78,16 +78,16 @@ io.on("connection", (socket) => {
 
   connectedUsers.push(user)
 
-  if (connectedUsers.length > 1 && !gameState.state) {
-    updateState(1)
-  }
+  io.of("/").emit("userList", connectedUsers)
+  socket.emit("addMyself", user)
 
   socket.on("clientMouseUpdate", (data) => {
     socket.broadcast.emit("cursorUpdate", data)
   })
 
-  io.of("/").emit("userList", connectedUsers)
-  socket.emit("addMyself", user)
+  if (connectedUsers.length > 1 && !gameState.state) {
+    updateState(1)
+  }
 
   socket.on("disconnect", () => {
     // console.log("Client disconnected", user.name)
