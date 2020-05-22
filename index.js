@@ -17,7 +17,7 @@ io.on("connection", (socket) => {
     name: randomName(),
     color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
   }
-  console.log("Client connected", user.name)
+  // console.log("Client connected", user.name)
 
   connectedUsers.push(user)
 
@@ -29,7 +29,7 @@ io.on("connection", (socket) => {
   socket.emit("addMyself", user)
 
   socket.on("disconnect", () => {
-    console.log("Client disconnected", user.name)
+    // console.log("Client disconnected", user.name)
 
     connectedUsers = connectedUsers.filter((u) => u.id !== user.id)
     io.of("/").emit("userList", connectedUsers)
