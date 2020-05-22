@@ -1,12 +1,13 @@
 import * as PIXI from "pixi.js"
 
+import { PATH_COLOR } from "./constants"
+
 class Path {
-  constructor(points, color) {
+  constructor(points) {
     if (!points || points.length <= 0) {
       console.error("Path require at least one point on init")
     }
     this.path = null
-    this.color = color
     this._points = points
 
     this._init()
@@ -20,7 +21,7 @@ class Path {
 
   _updatePath() {
     this.path.clear()
-    this.path.lineStyle(2, this.color, 1)
+    this.path.lineStyle(2, PATH_COLOR, 1)
     this.path.moveTo(this._points[0].x, this._points[0].y)
 
     this._points.forEach(({ x, y }) => {

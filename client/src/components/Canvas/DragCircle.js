@@ -1,13 +1,14 @@
 import * as PIXI from "pixi.js"
 
+import { DRAG_COLOR } from "./constants"
+
 class DragCircle {
-  constructor(x, y, radius, color) {
+  constructor(x, y, radius) {
     this.circle = null
     this.pos = {
       x,
       y,
     }
-    this.color = color
     this.radius = radius
 
     this.state = {
@@ -19,7 +20,7 @@ class DragCircle {
 
   _init() {
     this.circle = new PIXI.Graphics()
-    this.circle.lineStyle(2, this.color, 1)
+    this.circle.lineStyle(2, DRAG_COLOR, 1)
     this.circle.drawCircle(this.x, this.y, this.radius)
 
     this.circle.interactive = true

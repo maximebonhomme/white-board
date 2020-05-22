@@ -7,7 +7,7 @@ import Cursors from "../Cursors"
 import DragCircle from "./DragCircle"
 import Path from "./Path"
 
-import { DRAG_RADIUS, DRAG_COLOR, PATH_COLOR } from "./constants"
+import { DRAG_RADIUS } from "./constants"
 
 import { Container, StyledCanvas } from "./styles"
 
@@ -41,12 +41,10 @@ const Canvas = () => {
     })
     canvasRef.current.appendChild(app.current.view)
 
-    // add dragCircle
-    dragCircle.current = new DragCircle(x, y, DRAG_RADIUS, DRAG_COLOR)
+    dragCircle.current = new DragCircle(x, y, DRAG_RADIUS)
     app.current.stage.addChild(dragCircle.current.pixiObject)
 
-    // add path
-    path.current = new Path([dragCircle.current.position], PATH_COLOR)
+    path.current = new Path([dragCircle.current.position])
     app.current.stage.addChild(path.current.pixiObject)
 
     app.current.ticker.add(mainLoop)
