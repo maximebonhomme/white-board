@@ -5,7 +5,7 @@ import gameReducer from "../reducers/gameReducer"
 
 import { SocketContext } from "./SocketContext"
 
-import { UPDATE_STATE } from "../actions/gameActions"
+import { UPDATE_STATE, UPDATE_CURRENT_PLAYER } from "../actions/gameActions"
 
 // states:
 // 0: waiting for players
@@ -16,7 +16,7 @@ import { UPDATE_STATE } from "../actions/gameActions"
 // 5: game finished - apply points
 
 const initialState = {
-  playerID: null,
+  currentPlayer: -1,
   points: 0,
   gameState: 0,
   isOnPath: false,
@@ -31,9 +31,12 @@ const GameProvider = ({ children }) => {
   const [state, dispatch] = useReducer(gameReducer, initialState)
 
   useEffect(() => {
-    socket.on(UPDATE_STATE, (newGameState) => {
-      console.log("updateGameState", newGameState)
-      dispatch({ type: UPDATE_STATE, payload: newGameState })
+    socket.on(UPDATE_STATE, (gameState) => {
+      dispatch({ type: UPDATE_STATE, payload: gameState })
+    })
+
+    socket.on(UPDATE_CURRENT_PLAYER, (currentPlayer) => {
+      dispatch({ type: UPDATE_CURRENT_PLAYER, payload: currentPlayer })
     })
 
     return () => {

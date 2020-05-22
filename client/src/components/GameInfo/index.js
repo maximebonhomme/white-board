@@ -29,6 +29,7 @@ const GameInfo = () => {
       <div>myPoints: {state.points}</div>
       <div>gameState: {state.gameState}</div>
       <div>cleanState: {cleanState[state.gameState]}</div>
+      <div>currentPlayer: {state.currentPlayer}</div>
     </Container>
   )
 }

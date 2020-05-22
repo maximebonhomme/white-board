@@ -21,7 +21,22 @@ let connectedUsers = []
 
 let gameState = {
   state: 0,
-  currentPlayer: 0,
+  currentPlayer: -1,
+}
+
+const pickPlayer = () => {
+  const { currentPlayer } = gameState
+
+  if (currentPlayer === -1 || currentPlayer === connectedUsers.length) {
+    gameState.currentPlayer = 0
+  } else {
+    gameState.currentPlayer = gameState.currentPlayer + 1
+  }
+
+  io.of("/").emit(
+    "updateCurrentPlayer",
+    connectedUsers[gameState.currentPlayer].id
+  )
 }
 
 const updateState = (newState) => {
@@ -32,7 +47,7 @@ const updateState = (newState) => {
     case 0:
       return
     case 1:
-    // pick player
+      pickPlayer()
     case 2:
     // send path to players
     case 3:
@@ -44,6 +59,13 @@ const updateState = (newState) => {
     // apply points
     // back to case 1
   }
+}
+
+const resetGameState = () => {
+  gameState.currentPlayer = -1
+
+  updateState(0)
+  io.of("/").emit("updateCurrentPlayer", gameState.currentPlayer)
 }
 
 io.on("connection", (socket) => {
@@ -73,7 +95,7 @@ io.on("connection", (socket) => {
     connectedUsers = connectedUsers.filter((u) => u.id !== user.id)
     io.of("/").emit("userList", connectedUsers)
     if (connectedUsers.length <= 1 && gameState.state > 0) {
-      updateState(0)
+      resetGameState()
     }
   })
 })
