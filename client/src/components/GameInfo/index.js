@@ -12,8 +12,8 @@ const Container = styled.div`
 
 const cleanState = {
   0: "waiting for players",
-  1: "pick player to draw",
-  2: "player finish drawing - send path to other players",
+  1: "picked player to draw",
+  2: "player finish drawing - path sent to other players",
   3: "game running",
   4: "1 player finished, start end timer (X sec)",
   5: "game finished - apply points",
@@ -22,14 +22,13 @@ const cleanState = {
 const GameInfo = () => {
   const { state } = useContext(GameContext)
 
-  console.log("state", state)
-
   return (
     <Container>
       <div>myPoints: {state.points}</div>
       <div>gameState: {state.gameState}</div>
       <div>cleanState: {cleanState[state.gameState]}</div>
       <div>currentPlayer: {state.currentPlayer}</div>
+      <div>currentPath: {state.currentPath && state.currentPath.length}</div>
     </Container>
   )
 }

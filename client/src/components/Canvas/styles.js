@@ -16,3 +16,10 @@ export const StyledCanvas = styled.div`
   position: absolute;
   ${full}
 `
+
+export const LaunchButton = styled.button`
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px;
+`

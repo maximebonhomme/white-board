@@ -5,7 +5,11 @@ import gameReducer from "../reducers/gameReducer"
 
 import { SocketContext } from "./SocketContext"
 
-import { UPDATE_STATE, UPDATE_CURRENT_PLAYER } from "../actions/gameActions"
+import {
+  UPDATE_STATE,
+  UPDATE_CURRENT_PLAYER,
+  UPDATE_CURRENT_PATH,
+} from "../actions/gameActions"
 
 // states:
 // 0: waiting for players
@@ -22,6 +26,7 @@ const initialState = {
   isOnPath: false,
   hasFinished: false,
   timeToFinish: null,
+  currentPath: [],
 }
 
 const GameContext = React.createContext(initialState)
@@ -39,8 +44,15 @@ const GameProvider = ({ children }) => {
       dispatch({ type: UPDATE_CURRENT_PLAYER, payload: currentPlayer })
     })
 
+    socket.on(UPDATE_CURRENT_PATH, (currentPath) => {
+      dispatch({ type: UPDATE_CURRENT_PATH, payload: currentPath })
+    })
+
     return () => {
-      socket.off(UPDATE_STATE)
+      socket
+        .off(UPDATE_STATE)
+        .off(UPDATE_CURRENT_PLAYER)
+        .off(UPDATE_CURRENT_PATH)
     }
   }, [dispatch, socket])
 

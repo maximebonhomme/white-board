@@ -22,6 +22,7 @@ let connectedUsers = []
 let gameState = {
   state: 0,
   currentPlayer: -1,
+  currentPath: [],
 }
 
 const pickPlayer = () => {
@@ -45,27 +46,40 @@ const updateState = (newState) => {
 
   switch (gameState.state) {
     case 0:
-      return
+      console.log("server gameState 0")
+      break
     case 1:
+      console.log("server gameState 1")
       pickPlayer()
+      break
     case 2:
-    // send path to players
+      console.log("server gameState 2")
+      io.of("/").emit("updateCurrentPath", gameState.currentPath)
+      break
     case 3:
-    // game running
-    // start server timer
+      console.log("server gameState 3")
+      // game running
+      // start server timer
+      break
     case 4:
-    // start server timer2
+      console.log("server gameState 4")
+      // start server timer2
+      break
     case 5:
-    // apply points
-    // back to case 1
+      console.log("server gameState 5")
+      // apply points
+      // back to case 1
+      break
   }
 }
 
 const resetGameState = () => {
   gameState.currentPlayer = -1
+  gameState.currentPath = []
 
   updateState(0)
   io.of("/").emit("updateCurrentPlayer", gameState.currentPlayer)
+  io.of("/").emit("updateCurrentPath", gameState.currentPath)
 }
 
 io.on("connection", (socket) => {
@@ -74,12 +88,17 @@ io.on("connection", (socket) => {
     name: randomName(),
     color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
   }
-  // console.log("Client connected", user.name)
+  console.log("Client connected", user.name)
 
   connectedUsers.push(user)
 
   io.of("/").emit("userList", connectedUsers)
   socket.emit("addMyself", user)
+
+  socket.on("clientSendPath", (data) => {
+    gameState.currentPath = data
+    updateState(2)
+  })
 
   socket.on("clientMouseUpdate", (data) => {
     socket.broadcast.emit("cursorUpdate", data)
@@ -90,7 +109,7 @@ io.on("connection", (socket) => {
   }
 
   socket.on("disconnect", () => {
-    // console.log("Client disconnected", user.name)
+    console.log("Client disconnected", user.name)
 
     connectedUsers = connectedUsers.filter((u) => u.id !== user.id)
     io.of("/").emit("userList", connectedUsers)

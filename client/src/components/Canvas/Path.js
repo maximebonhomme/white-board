@@ -24,7 +24,8 @@ class Path {
     this.path.lineStyle(PATH_WIDTH, PATH_COLOR, 1)
     this.path.moveTo(this._points[0].x, this._points[0].y)
 
-    this._points.forEach(({ x, y }) => {
+    this._points.forEach(({ x, y }, index) => {
+      if (index === 0) return
       this.path.lineTo(x, y)
     })
   }
@@ -39,6 +40,13 @@ class Path {
 
   get pixiObject() {
     return this.path
+  }
+
+  set createPath(points) {
+    console.log("path points", points)
+    this._points = points
+
+    this._updatePath()
   }
 
   set addPoint({ x, y }) {
