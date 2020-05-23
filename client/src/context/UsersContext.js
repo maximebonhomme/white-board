@@ -8,7 +8,7 @@ import { SocketContext } from "./SocketContext"
 
 const initialState = {
   users: [],
-  myself: { id: -1 },
+  myself: null,
 }
 
 const UsersContext = React.createContext(initialState)

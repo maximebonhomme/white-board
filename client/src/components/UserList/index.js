@@ -2,25 +2,26 @@ import React, { useContext } from "react"
 
 import { UsersContext } from "../../context/UsersContext"
 
+import { Container, List } from "./styles"
+
 const UserList = () => {
   const { state } = useContext(UsersContext)
+  if (!state.myself) return null
 
   return (
-    <>
-      <h2>Users connected:</h2>
-
-      <ul>
+    <Container>
+      <List>
         {state.users.map(({ id, name, color }) => {
           const isMyself = id === state.myself.id
 
           return (
-            <li style={{ color: isMyself ? "#000" : color }} key={id}>
-              {name}
+            <li style={{ color }} key={id}>
+              {name} {isMyself && "(you)"}
             </li>
           )
         })}
-      </ul>
-    </>
+      </List>
+    </Container>
   )
 }
 
