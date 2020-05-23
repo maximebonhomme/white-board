@@ -57,7 +57,7 @@ const Canvas = () => {
     dragCircle.current = new DragCircle(x, y, DRAG_RADIUS)
     path.current = new Path([dragCircle.current.position])
 
-    app.current.stage.addChild(path.current.pixiObject)
+    path.current.addToScene(app.current.stage)
     app.current.stage.addChild(dragCircle.current.pixiObject)
   }
 
@@ -65,12 +65,18 @@ const Canvas = () => {
     const { currentPath } = gameCtx.state
     if (!currentPath || !currentPath.length) return
 
-    path.current.createPath = currentPath
+    if (!path.current) {
+      path.current = new Path(currentPath)
+      path.current.addToScene(app.current.stage)
+    } else {
+      path.current.createPath = currentPath
+    }
+
+    path.current.showStartFinish()
   }
 
   const handleFinishDrawing = () => {
     socket.emit("clientSendPath", path.current.points)
-    app.current.stage.removeChild(dragCircle.current)
     setDoneButton(false)
   }
 
@@ -91,10 +97,6 @@ const Canvas = () => {
   }, [canvasRef, width, height, mainLoop])
 
   useEffect(() => {
-    if (!path || (!path.current && !dragCircle) || !dragCircle.current) {
-      createPathAndDragCircle()
-    }
-
     switch (gameCtx.state.gameState) {
       case 0:
         console.log("client gameState 0")
@@ -103,7 +105,8 @@ const Canvas = () => {
         console.log("client gameState 1")
         if (gameCtx.state.currentPlayer === usersCtx.state.myself.id) {
           console.log("is myself creating path")
-          dragCircle.current.activate()
+          createPathAndDragCircle()
+          // dragCircle.current.activate()
           setDoneButton(true)
         } else {
           console.log("is not myself waiting for path")
@@ -113,8 +116,8 @@ const Canvas = () => {
         break
       case 2:
         console.log("client gameState 2")
+        if (dragCircle.current) dragCircle.current.clear()
         createPath()
-        dragCircle.current.clear()
         break
       case 3:
         console.log("client gameState 3")

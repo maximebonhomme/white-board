@@ -16,7 +16,6 @@ class DragCircle {
 
     this.state = {
       canDraw: false,
-      isInactive: true,
     }
 
     this._init()
@@ -32,20 +31,18 @@ class DragCircle {
       this.radius * 2
     )
 
+    this.circle.lineStyle(2, DRAG_COLOR, 1)
+    this.circle.drawCircle(this.x, this.y, this.radius)
+
+    this.circle.interactive = true
+    this.circle.buttonMode = true
+
     this.circle.on("pointerdown", this._handlePointerDown.bind(this))
     this.circle.on("pointerup", this._handlePointerUp.bind(this))
     this.circle.on("pointerupoutside", this._handlePointerUp.bind(this))
     this.circle.on("pointermove", this._handlePointerMove.bind(this))
 
     this._updatePosition(this.pos)
-  }
-
-  _createCircle() {
-    this.circle.lineStyle(2, DRAG_COLOR, 1)
-    this.circle.drawCircle(this.x, this.y, this.radius)
-
-    this.circle.interactive = true
-    this.circle.buttonMode = true
   }
 
   _handlePointerDown() {
@@ -59,8 +56,8 @@ class DragCircle {
   }
 
   _handlePointerMove(e) {
-    const { canDraw, isInactive } = this.state
-    if (!canDraw && isInactive) return
+    const { canDraw } = this.state
+    if (!canDraw) return
 
     const { x, y } = e.data.global
     this.pos = { x, y }
@@ -90,14 +87,6 @@ class DragCircle {
 
   get pixiObject() {
     return this.circle
-  }
-
-  get isInactive() {
-    return this.state.isInactive
-  }
-
-  activate() {
-    this._createCircle()
   }
 
   clear() {
