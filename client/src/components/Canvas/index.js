@@ -63,6 +63,7 @@ const Canvas = () => {
 
   const createPath = () => {
     const { currentPath } = gameCtx.state
+    console.log(currentPath)
     if (!currentPath || !currentPath.length) return
 
     if (!path.current) {
