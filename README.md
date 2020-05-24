@@ -3,12 +3,16 @@
 ### React, Express & Socket.io
 
 ## Installation
+
 `$ make install`
 
 ## Development
-`$ node index.js`
 
-`$ cd client/`
+`$ cd server/`
+
+`$ yarn start`
+
+`$ cd ../client/`
 
 `$ yarn start`
 

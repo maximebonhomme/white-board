@@ -3,13 +3,14 @@ const http = require("http")
 const socketIo = require("socket.io")
 const randomName = require("node-random-name")
 
+const { addUser, removeUser, getUser, getUsers } = require("./users")
+const { getNextPlayerIndex, getPlayerByIndex } = require("./game")
+
 const app = express()
 const port = process.env.PORT || 9000
 
 const server = http.createServer(app)
 const io = socketIo(server)
-
-let connectedUsers = []
 
 // states:
 // 0: waiting for players (min 2)
@@ -27,17 +28,10 @@ let gameState = {
 
 const pickPlayer = () => {
   const { currentPlayer } = gameState
+  gameState.currentPlayer = getNextPlayerIndex({ currentPlayer })
+  const nextPlayer = getPlayerByIndex({ index: gameState.currentPlayer })
 
-  if (currentPlayer === -1 || currentPlayer === connectedUsers.length) {
-    gameState.currentPlayer = 0
-  } else {
-    gameState.currentPlayer = gameState.currentPlayer + 1
-  }
-
-  io.of("/").emit(
-    "updateCurrentPlayer",
-    connectedUsers[gameState.currentPlayer].id
-  )
+  io.of("/").emit("updateCurrentPlayer", nextPlayer.id)
 }
 
 const updateState = (newState) => {
@@ -83,16 +77,11 @@ const resetGameState = () => {
 }
 
 io.on("connection", (socket) => {
-  const user = {
-    id: socket.id,
-    name: randomName(),
-    color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
-  }
-  console.log("Client connected", user.name)
+  console.log("Client connected", socket.id)
 
-  connectedUsers.push(user)
+  const user = addUser({ id: socket.id, name: randomName() })
 
-  io.of("/").emit("userList", connectedUsers)
+  io.of("/").emit("userList", getUsers())
   socket.emit("addMyself", user)
 
   socket.on("clientSendPath", (data) => {
@@ -104,16 +93,16 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("cursorUpdate", data)
   })
 
-  if (connectedUsers.length > 1 && !gameState.state) {
+  if (getUsers().length > 1 && !gameState.state) {
     updateState(1)
   }
 
   socket.on("disconnect", () => {
-    console.log("Client disconnected", user.name)
+    console.log("Client disconnected", socket.id)
 
-    connectedUsers = connectedUsers.filter((u) => u.id !== user.id)
-    io.of("/").emit("userList", connectedUsers)
-    if (connectedUsers.length <= 1 && gameState.state > 0) {
+    removeUser({ id: socket.id })
+    io.of("/").emit("userList", getUsers())
+    if (getUsers().length <= 1 && gameState.state > 0) {
       resetGameState()
     }
   })
