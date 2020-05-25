@@ -8,12 +8,8 @@
 
 ## Development
 
-`$ cd server/`
+`$ cd server/ && yarn start`
 
-`$ yarn start`
-
-`$ cd ../client/`
-
-`$ yarn start`
+`$ cd client/ && yarn start`
 
 `http://localhost:3000`
