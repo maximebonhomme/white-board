@@ -42,24 +42,28 @@ class Path {
   _handleStartIn() {
     if (!this.gameRunning) return
 
+    console.log("_handleStartIn")
     this.inStart = true
   }
 
   _handleStartOut() {
     if (!this.gameRunning) return
 
+    console.log("_handleStartOut")
     this.inStart = false
   }
 
   _handleFinishIn() {
     if (!this.gameRunning) return
 
+    console.log("_handleFinishIn")
     this.inFinish = true
   }
 
   _handleFinishOut() {
     if (!this.gameRunning) return
 
+    console.log("_handleFinishOut")
     this.inFinish = false
   }
 
@@ -70,10 +74,22 @@ class Path {
     this.start.lineStyle(2, 0x00ff28, 1)
     this.start.drawCircle(0, 0, PATH_WIDTH)
     this.start.interactive = true
+    this.start.hitArea = new PIXI.Rectangle(
+      -PATH_WIDTH,
+      -PATH_WIDTH,
+      PATH_WIDTH * 2,
+      PATH_WIDTH * 2
+    )
 
     this.finish.lineStyle(2, 0xee1010, 1)
     this.finish.drawCircle(0, 0, PATH_WIDTH)
     this.finish.interactive = true
+    this.finish.hitArea = new PIXI.Rectangle(
+      -PATH_WIDTH,
+      -PATH_WIDTH,
+      PATH_WIDTH * 2,
+      PATH_WIDTH * 2
+    )
 
     this.start.on("pointerover", this._handleStartIn.bind(this))
     this.start.on("pointerout", this._handleStartOut.bind(this))
@@ -116,6 +132,12 @@ class Path {
     this.finish.position.set(finish.x, finish.y)
     this.start.alpha = 1
     this.finish.alpha = 1
+  }
+
+  clear() {
+    this.path.clear()
+    this.start.clear()
+    this.finish.clear()
   }
 }
 

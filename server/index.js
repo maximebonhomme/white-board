@@ -3,13 +3,33 @@ const http = require("http")
 const socketIo = require("socket.io")
 const randomName = require("node-random-name")
 
+const {
+  addUser,
+  removeUser,
+  getUser,
+  getUserByIndex,
+  getUsers,
+} = require("./users")
+const {
+  setCurrentPath,
+  setGameState,
+  setCurrentPlayer,
+  getCurrentPlayer,
+  getCurrentPath,
+  getGameState,
+} = require("./game")
+const {
+  dispatchGameState,
+  dispatchCurrentPlayer,
+  dispatchCurrentPath,
+  dispatchUserList,
+} = require("./socketDispatcher")
+
 const app = express()
 const port = process.env.PORT || 9000
 
 const server = http.createServer(app)
 const io = socketIo(server)
-
-let connectedUsers = []
 
 // states:
 // 0: waiting for players (min 2)
@@ -19,32 +39,30 @@ let connectedUsers = []
 // 4: 1 player finished, start end timer (X sec)
 // 5: game finished - apply points
 
-let gameState = {
-  state: 0,
-  currentPlayer: -1,
-  currentPath: [],
-}
-
 const pickPlayer = () => {
-  const { currentPlayer } = gameState
+  const currentPlayer = getCurrentPlayer()
+  const users = getUsers()
+  let nextPlayer
 
-  if (currentPlayer === -1 || currentPlayer === connectedUsers.length) {
-    gameState.currentPlayer = 0
+  if (currentPlayer === -1 || currentPlayer === users.length - 1) {
+    nextPlayer = 0
   } else {
-    gameState.currentPlayer = gameState.currentPlayer + 1
+    nextPlayer = currentPlayer + 1
   }
+
+  setCurrentPlayer({ currentPlayer: nextPlayer })
 
   io.of("/").emit(
     "updateCurrentPlayer",
-    connectedUsers[gameState.currentPlayer].id
+    getUserByIndex({ index: nextPlayer }).id
   )
 }
 
 const updateState = (newState) => {
-  gameState.state = newState
-  io.of("/").emit("updateGameState", gameState.state)
+  setGameState({ newState })
+  dispatchGameState({ io, payload: getGameState() })
 
-  switch (gameState.state) {
+  switch (getGameState()) {
     case 0:
       console.log("server gameState 0")
       break
@@ -54,7 +72,7 @@ const updateState = (newState) => {
       break
     case 2:
       console.log("server gameState 2")
-      io.of("/").emit("updateCurrentPath", gameState.currentPath)
+      io.of("/").emit("updateCurrentPath", getCurrentPath())
       break
     case 3:
       console.log("server gameState 3")
@@ -74,29 +92,25 @@ const updateState = (newState) => {
 }
 
 const resetGameState = () => {
-  gameState.currentPlayer = -1
-  gameState.currentPath = []
+  setCurrentPlayer({ currentPlayer: -1 })
+  setCurrentPath({ path: [] })
 
   updateState(0)
-  io.of("/").emit("updateCurrentPlayer", gameState.currentPlayer)
-  io.of("/").emit("updateCurrentPath", gameState.currentPath)
+
+  dispatchCurrentPlayer({ io, payload: getCurrentPlayer() })
+  dispatchCurrentPath({ io, payload: getCurrentPath() })
 }
 
 io.on("connection", (socket) => {
-  const user = {
-    id: socket.id,
-    name: randomName(),
-    color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
-  }
-  console.log("Client connected", user.name)
+  console.log("Client connected", socket.id)
 
-  connectedUsers.push(user)
+  const user = addUser({ id: socket.id, name: randomName() })
 
-  io.of("/").emit("userList", connectedUsers)
+  dispatchUserList({ io, payload: getUsers() })
   socket.emit("addMyself", user)
 
   socket.on("clientSendPath", (data) => {
-    gameState.currentPath = data
+    setCurrentPath({ path: data })
     updateState(2)
   })
 
@@ -104,16 +118,16 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("cursorUpdate", data)
   })
 
-  if (connectedUsers.length > 1 && !gameState.state) {
+  if (getUsers().length > 1 && !getGameState()) {
     updateState(1)
   }
 
   socket.on("disconnect", () => {
-    console.log("Client disconnected", user.name)
+    console.log("Client disconnected", socket.id)
 
-    connectedUsers = connectedUsers.filter((u) => u.id !== user.id)
-    io.of("/").emit("userList", connectedUsers)
-    if (connectedUsers.length <= 1 && gameState.state > 0) {
+    removeUser({ id: socket.id })
+    dispatchUserList({ io, payload: getUsers() })
+    if (getUsers().length <= 1 && getGameState() > 0) {
       resetGameState()
     }
   })
