@@ -1,6 +1,4 @@
-const { getUsers } = require("./users")
-
-let state = {
+const state = {
   state: 0,
   currentPlayer: -1,
   currentPath: [],
