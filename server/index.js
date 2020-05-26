@@ -3,8 +3,21 @@ const http = require("http")
 const socketIo = require("socket.io")
 const randomName = require("node-random-name")
 
-const { addUser, removeUser, getUser, getUsers } = require("./users")
-const { getNextPlayerIndex, getPlayerByIndex } = require("./game")
+const {
+  addUser,
+  removeUser,
+  getUser,
+  getUserByIndex,
+  getUsers,
+} = require("./users")
+const {
+  setCurrentPath,
+  setGameState,
+  setCurrentPlayer,
+  getCurrentPlayer,
+  getCurrentPath,
+  getGameState,
+} = require("./game")
 
 const app = express()
 const port = process.env.PORT || 9000
@@ -20,25 +33,30 @@ const io = socketIo(server)
 // 4: 1 player finished, start end timer (X sec)
 // 5: game finished - apply points
 
-let gameState = {
-  state: 0,
-  currentPlayer: -1,
-  currentPath: [],
-}
-
 const pickPlayer = () => {
-  const { currentPlayer } = gameState
-  gameState.currentPlayer = getNextPlayerIndex({ currentPlayer })
-  const nextPlayer = getPlayerByIndex({ index: gameState.currentPlayer })
+  const currentPlayer = getCurrentPlayer()
+  const users = getUsers()
+  let nextPlayer
 
-  io.of("/").emit("updateCurrentPlayer", nextPlayer.id)
+  if (currentPlayer === -1 || currentPlayer === users.length - 1) {
+    nextPlayer = 0
+  } else {
+    nextPlayer = currentPlayer + 1
+  }
+
+  setCurrentPlayer({ currentPlayer: nextPlayer })
+
+  io.of("/").emit(
+    "updateCurrentPlayer",
+    getUserByIndex({ index: nextPlayer }).id
+  )
 }
 
 const updateState = (newState) => {
-  gameState.state = newState
-  io.of("/").emit("updateGameState", gameState.state)
+  setGameState({ newState })
+  io.of("/").emit("updateGameState", getGameState())
 
-  switch (gameState.state) {
+  switch (getGameState()) {
     case 0:
       console.log("server gameState 0")
       break
@@ -48,7 +66,7 @@ const updateState = (newState) => {
       break
     case 2:
       console.log("server gameState 2")
-      io.of("/").emit("updateCurrentPath", gameState.currentPath)
+      io.of("/").emit("updateCurrentPath", getCurrentPath())
       break
     case 3:
       console.log("server gameState 3")
@@ -68,12 +86,13 @@ const updateState = (newState) => {
 }
 
 const resetGameState = () => {
-  gameState.currentPlayer = -1
-  gameState.currentPath = []
+  setCurrentPlayer({ currentPlayer: -1 })
+  setCurrentPath({ path: [] })
 
   updateState(0)
-  io.of("/").emit("updateCurrentPlayer", gameState.currentPlayer)
-  io.of("/").emit("updateCurrentPath", gameState.currentPath)
+
+  io.of("/").emit("updateCurrentPlayer", getCurrentPlayer())
+  io.of("/").emit("updateCurrentPath", getCurrentPath())
 }
 
 io.on("connection", (socket) => {
@@ -85,7 +104,7 @@ io.on("connection", (socket) => {
   socket.emit("addMyself", user)
 
   socket.on("clientSendPath", (data) => {
-    gameState.currentPath = data
+    setCurrentPath({ path: data })
     updateState(2)
   })
 
@@ -93,7 +112,7 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("cursorUpdate", data)
   })
 
-  if (getUsers().length > 1 && !gameState.state) {
+  if (getUsers().length > 1 && !getGameState()) {
     updateState(1)
   }
 
@@ -102,7 +121,7 @@ io.on("connection", (socket) => {
 
     removeUser({ id: socket.id })
     io.of("/").emit("userList", getUsers())
-    if (getUsers().length <= 1 && gameState.state > 0) {
+    if (getUsers().length <= 1 && getGameState() > 0) {
       resetGameState()
     }
   })

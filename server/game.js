@@ -1,21 +1,48 @@
 const { getUsers } = require("./users")
 
-const getNextPlayerIndex = ({ currentPlayer }) => {
-  const users = getUsers()
-  let nextUserIndex
-
-  if (currentPlayer === -1 || currentPlayer === users.length) {
-    nextUserIndex = 0
-  } else {
-    nextUserIndex = currentPlayer + 1
-  }
-
-  return nextUserIndex
+let state = {
+  state: 0,
+  currentPlayer: -1,
+  currentPath: [],
 }
 
-const getPlayerByIndex = ({ index }) => {
-  const users = getUsers()
-  return users[index]
+const setCurrentPath = ({ path }) => {
+  state.currentPath = path
+  return state.currentPath
 }
 
-module.exports = { getNextPlayerIndex, getPlayerByIndex }
+const setGameState = ({ newState }) => {
+  state.state = newState
+  return state.state
+}
+
+const setCurrentPlayer = ({ currentPlayer }) => {
+  state.currentPlayer = currentPlayer
+  return state.currentPlayer
+}
+
+const getState = () => {
+  return state
+}
+
+const getCurrentPlayer = () => {
+  return state.currentPlayer
+}
+
+const getCurrentPath = () => {
+  return state.currentPath
+}
+
+const getGameState = () => {
+  return state.state
+}
+
+module.exports = {
+  setCurrentPath,
+  setGameState,
+  setCurrentPlayer,
+  getState,
+  getCurrentPlayer,
+  getCurrentPath,
+  getGameState,
+}

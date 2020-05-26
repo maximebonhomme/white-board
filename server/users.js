@@ -25,8 +25,12 @@ const getUser = ({ id }) => {
   return users.find((u) => u.id === id)
 }
 
+const getUserByIndex = ({ index }) => {
+  return users[index]
+}
+
 const getUsers = () => {
   return users
 }
 
-module.exports = { addUser, removeUser, getUser, getUsers }
+module.exports = { addUser, removeUser, getUser, getUsers, getUserByIndex }
