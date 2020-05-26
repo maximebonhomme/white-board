@@ -5,6 +5,7 @@
   "main": "server/index.js",
   "scripts": {
     "start": "cd server/ && node .",
+    "build": "cd client/ && npm install --only=dev && npm install && npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
