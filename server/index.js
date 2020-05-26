@@ -18,6 +18,12 @@ const {
   getCurrentPath,
   getGameState,
 } = require("./game")
+const {
+  dispatchGameState,
+  dispatchCurrentPlayer,
+  dispatchCurrentPath,
+  dispatchUserList,
+} = require("./socketDispatcher")
 
 const app = express()
 const port = process.env.PORT || 9000
@@ -54,7 +60,7 @@ const pickPlayer = () => {
 
 const updateState = (newState) => {
   setGameState({ newState })
-  io.of("/").emit("updateGameState", getGameState())
+  dispatchGameState({ io, payload: getGameState() })
 
   switch (getGameState()) {
     case 0:
@@ -91,8 +97,8 @@ const resetGameState = () => {
 
   updateState(0)
 
-  io.of("/").emit("updateCurrentPlayer", getCurrentPlayer())
-  io.of("/").emit("updateCurrentPath", getCurrentPath())
+  dispatchCurrentPlayer({ io, payload: getCurrentPlayer() })
+  dispatchCurrentPath({ io, payload: getCurrentPath() })
 }
 
 io.on("connection", (socket) => {
@@ -100,7 +106,7 @@ io.on("connection", (socket) => {
 
   const user = addUser({ id: socket.id, name: randomName() })
 
-  io.of("/").emit("userList", getUsers())
+  dispatchUserList({ io, payload: getUsers() })
   socket.emit("addMyself", user)
 
   socket.on("clientSendPath", (data) => {
@@ -120,7 +126,7 @@ io.on("connection", (socket) => {
     console.log("Client disconnected", socket.id)
 
     removeUser({ id: socket.id })
-    io.of("/").emit("userList", getUsers())
+    dispatchUserList({ io, payload: getUsers() })
     if (getUsers().length <= 1 && getGameState() > 0) {
       resetGameState()
     }
