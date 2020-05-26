@@ -133,6 +133,12 @@ class Path {
     this.start.alpha = 1
     this.finish.alpha = 1
   }
+
+  clear() {
+    this.path.clear()
+    this.start.clear()
+    this.finish.clear()
+  }
 }
 
 export default Path

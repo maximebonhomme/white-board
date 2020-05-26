@@ -101,6 +101,7 @@ const Canvas = () => {
     switch (gameCtx.state.gameState) {
       case 0:
         console.log("client gameState 0")
+        if (path.current) path.current.clear()
         setDoneButton(false)
         break
       case 1:
